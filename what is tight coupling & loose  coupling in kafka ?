@@ -1,0 +1,41 @@
+Tight coupling means applications depend heavily on each other’s availability, timing, or message format.
+
+Loose coupling means applications communicate through Kafka topics, so producers and consumers can operate more independently.
+
+Tight coupling example
+Imagine an e-commerce application where the Order Service directly calls the Payment Service and Inventory Service.
+Order Service
+
+Synchronous API call --> Payment Service --> Synchronous API call --> Inventory Service
+
+If a required downstream service is unavailable, the order request may fail or become slow.
+
+For example, if the Payment Service is down, the Order Service may have to wait, retry, or return an error. This is a tightly coupled communication pattern.
+
+# 2). Loose coupling using Kafka
+Instead of calling each service directly, the Order Service publishes an event to a Kafka topic. Other services consume the event independently.
+
+Order Service — (Producer) --> Publishes Order Created event  --> Kafka topic: orders --> Consumers read independently --> for these services
+
+1.Payment Service  2. --> Inventory Service  3 --> Notification Service
+
+Services can consume events independently and at different speeds.
+
+How does this work?
+1. The Order Service publishes an OrderCreated event to the Kafka orders topic.
+2. The Payment Service consumes the event and processes payment.
+3. The Inventory Service consumes the event and updates stock.
+4. The Notification Service consumes the event and sends an order confirmation.
+
+Tight coupling	Loose coupling with Kafka :
+
+Communication	: Tight coupling -- Direct API calls	| Loose coupling with Kafka -- Producer → Kafka topic → consumer
+Availability :	Tight coupling -- Downstream availability may affect requests	| Loose coupling with Kafka : Consumers can often recover and process later
+Processing	Often synchronous	Commonly asynchronous
+Scalability	: Tight coupling -- Dependencies can complicate scaling	| Loose coupling with Kafka :Producers and consumers can scale independently
+Failure handling : Tight coupling --	Timeouts and retries between services	| Loose coupling with Kafka : Retention, consumer retries, and replay
+Dependency : Tight coupling -- Direct runtime dependency | Loose coupling with Kafka : 	Dependency on Kafka and the event contract
+
+Interview answer: “In a tightly coupled architecture, the Order Service directly calls Payment, Inventory, and Notification services, making it dependent on their availability.
+With Kafka, the Order Service publishes an event to a topic, and each consumer processes it independently. This improves asynchronous processing,
+scalability, and resilience, provided we handle retries, event schemas, duplicate processing, and Kafka availability correctly.
