@@ -1,0 +1,40 @@
+
+Loose coupling using Kafka commonly means asynchronous communication between services.
+
+However, loose coupling and asynchronous communication are related but not exactly the same thing.
+How asynchronous communication works with Kafka
+Example: An e-commerce application processes an order.
+1. Order Service (Publishes OrderCreated event) --> 2. Kafka topic: orders (Stores the event for consumers to read) -- > 
+
+-- > 3. Consumer services
+Payment · Inventory · Notifications
+Process the event independently
+
+What happens step by step?
+
+1. The Order Service publishes an event to Kafka.
+2. Once Kafka acknowledges the write according to the producer configuration, the Order Service can continue without waiting for every consumer to finish processing.
+3. Payment, Inventory, and Notification services consume the event independently.
+4. If the Notification Service is temporarily unavailable, it can process retained events after recovering, as long as those events are still available.
+
+Synchronous               vs        asynchronous
+Synchronous call	                  Asynchronous Kafka
+
+Service A calls Service B
+and waits for a response.	         Service A publishes an event and does not wait for consumer processing to finish.
+
+Often uses REST API or gRPC.	     Uses Kafka topics and producers/consumers.
+
+Downstream delays can affect
+upstream response time.	           Consumer delays are often isolated from the producer.
+                                   Immediate response is possible.	Processing may complete later.
+
+Important interview point: 
+
+Kafka producer-to-broker communication is still a request/acknowledgment interaction. 
+The asynchronous part is that the producer does not need to wait for the consumer services to complete their work.
+Also, if the Order Service must confirm payment before accepting an order, it needs an appropriate workflow—for example,
+an order status of PENDING_PAYMENT followed by a payment-result event.
+
+Interview answer: “Yes, Kafka enables asynchronous communication, which helps achieve loose coupling. Producers publish events to topics,
+and consumers process them independently. This reduces direct runtime dependencies and improves scalability and resilience.”
